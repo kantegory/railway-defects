@@ -15,9 +15,9 @@ def show_main():
     else:
         date = datetime.datetime.now().strftime('%d.%m.%Y')
     rows = create_report_by_date(date)
-    print(rows)
-
-    return template('assets/index', date=date, rows=rows, json_data=rows)
+    print('this date data', rows)
+    print(type(rows))
+    return template('assets/index', date=date, rows=rows, json_data=rows, response_date=request.params.date)
 
 
 @route('/new_report', method='GET')
@@ -31,6 +31,17 @@ def show_report():
 @route('/map')
 def show_map():
     return template('assets/polyline.html')
+
+
+@route('/get_points', method='GET')
+def get_points():
+    if request.params:
+        date = request.params.date.split('-')
+        date = '{}.{}.{}'.format(date[2], date[1], date[0])
+    else:
+        date = datetime.datetime.now().strftime('%d.%m.%Y')
+    rows = create_report_by_date(date)
+    return rows
 
 
 def main():
