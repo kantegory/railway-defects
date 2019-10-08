@@ -10,15 +10,13 @@ def add_new_data(json_data):
     json_data = json_data['data']
 
     for point in json_data:
-        # print(point['coordinate']['latitude'])
         parameter_add(point)
 
 
 def create_report_by_date(date):
-
     data = {'time': date}
     report_parameters = parameter_select_by_date(data)
-
+    print('this', report_parameters)
     return report_parameters
 
 
@@ -93,3 +91,12 @@ def clusterize():
 
 
 clusterize()
+
+
+def get_date_from_request(request_params):
+
+    date = request_params.date if request_params.date else datetime.datetime.now().strftime('%Y-%m-%d')
+    date = date.split('-')
+    date = '{}.{}.{}'.format(date[2], date[1], date[0])
+
+    return date
