@@ -37,31 +37,25 @@
             <p id="jsonData" hidden>{{ json_data }}</p>
             <script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU&amp;apikey=b82b407e-9d44-4439-bd5d-ecd991b142bb" type="text/javascript"></script>
             <script type="text/javascript">
-            function fetch_json() {
-                return fetch('/get_points?date={{ response_date }}')
-                    .then(res => res.json());
-            }
-
-            async function get_points(fetch) {
-                let promise = new Promise((resolve, reject) => {
-                    setTimeout(() => resolve(fetch), 1000)
-                });
-                result = await promise;
-                return get_json_data(result);
-            }
-
-            function get_json_data(result) {
-                console.log('this is res', result);
-                jsonData = result; // done
-                showMap(result)
-            }
-
-            function showMap(jsonData) {
-                ymaps.ready(init);
-
-                console.log(typeof(jsonData));
-                console.log('this is json data heeelloo', jsonData);
-
+                function fetch_json() {
+                    return fetch('/get_points?date={{ response_date }}')
+                        .then(res => res.json());
+                }
+                
+                async function get_points(fetch) {
+                    let promise = new Promise((resolve, reject) => {
+                        setTimeout(() => resolve(fetch), 1000)
+                    });
+                    result = await promise;
+                    return get_json_data(result);
+                }
+                
+                function get_json_data(result) {
+                    console.log('this is res', result);
+                    jsonData = result; // done
+                    showMap(result)
+                }
+                
                 function setDot(map, coord) {
                     console.log(coord);
                     myMap = map;
@@ -73,7 +67,8 @@
                             iconCaptionMaxWidth: '50'
                         }));
                 }
-
+                
+                
                 function setDotYe(map, coord) {
                     console.log(coord);
                     myMap = map;
@@ -85,19 +80,19 @@
                             iconCaptionMaxWidth: '50'
                         }));
                 }
-
-
-                function init() {
-                    // Создаем карту.
+                
+                function show_point(point) {
+                    document.getElementById('map').innerHTML = '';
+                
                     var myMap = new ymaps.Map("map", {
-                        center: [(jsonData[0].latitude), (jsonData[0].longitude)],
+                        center: [(point.latitude), (point.longitude)],
                         zoom: 10
                     }, {
                         searchControlProvider: 'yandex#search'
                     });
-
+                
                     let routes = [];
-
+                
                     for (var i = 0; i < jsonData.length; i++) {
                         routes[i] = [(jsonData[i].latitude), (jsonData[i].longitude)];
                         if (jsonData[i].acceleration > 6) {
@@ -106,14 +101,58 @@
                             setDotYe(myMap, routes[i])
                         }
                     }
-
-                    console.log(routes);
-                    setDotYe(myMap, [60.117892, 30.150051])
-
+                
                 }
-            }
-
-            get_points(fetch_json());
+                
+                function showMap(jsonData) {
+                    ymaps.ready(init);
+                
+                
+                    function init() {
+                        // Создаем карту.
+                        var myMap = new ymaps.Map("map", {
+                            center: [(jsonData[0].latitude), (jsonData[0].longitude)],
+                            zoom: 10
+                        }, {
+                            searchControlProvider: 'yandex#search'
+                        });
+                
+                        let routes = [];
+                
+                        for (var i = 0; i < jsonData.length; i++) {
+                            routes[i] = [(jsonData[i].latitude), (jsonData[i].longitude)];
+                            if (jsonData[i].acceleration > 6) {
+                                setDot(myMap, routes[i])
+                            } else {
+                                setDotYe(myMap, routes[i])
+                            }
+                        }
+                
+                        console.log(routes);
+                        setDotYe(myMap, [60.117892, 30.150051])
+                
+                    }
+                
+                
+                
+                    function init_table() {
+                        for (let i = 0; i < jsonData.length; i++) {
+                            document.querySelector('tbody').innerHTML += `
+                                            <tr onclick='show_point(` + JSON.stringify(jsonData[i]) + `)'>
+                                                <td>` + i + `</td>
+                                                <td>` + jsonData[i].latitude + `</td>
+                                                <td>` + jsonData[i].longitude + `</td>
+                                                <td>` + jsonData[i].acceleration + `</td>
+                                            </tr>
+                                        `
+                        }
+                    }
+                    init_table();
+                
+                
+                }
+                
+                get_points(fetch_json());
             </script>
             <div id="map" style="min-height: 500px"></div>
             <h2>Подробные данные</h2>
@@ -127,7 +166,7 @@
                             <th>Значение датчика</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody style="cursor: pointer;">
                     </tbody>
                 </table>
             </div>
