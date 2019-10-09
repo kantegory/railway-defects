@@ -23,10 +23,10 @@
     <div class="container-fluid mt-5">
         <main role="main" class="bg-light p-3">
             <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                <h1 class="h2">Отчёт за {{ date }}</h1>
+                <h1 class="h2" id="report_name">Отчёт за {{ date }}</h1>
                 <div class="btn-toolbar mb-2 mb-md-0">
                     <div class="btn-group mr-2">
-                        <button type="button" class="btn btn-sm btn-outline-secondary">Экспортировать</button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary" id="export">Экспортировать</button>
                     </div>
                     <form action="/" method="get">
                         <input type="date" name="date" class="btn btn-sm btn-outline-secondary">
@@ -34,14 +34,13 @@
                     </form>
                 </div>
             </div>
-            <p id="jsonData" hidden>{{ json_data }}</p>
             <script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU&amp;apikey=b82b407e-9d44-4439-bd5d-ecd991b142bb" type="text/javascript"></script>
             <script type="text/javascript">
                 function fetch_json() {
                     return fetch('/get_points?date={{ response_date }}')
                         .then(res => res.json());
                 }
-                
+
                 async function get_points(fetch) {
                     let promise = new Promise((resolve, reject) => {
                         setTimeout(() => resolve(fetch), 1000)
@@ -49,13 +48,13 @@
                     result = await promise;
                     return get_json_data(result);
                 }
-                
+
                 function get_json_data(result) {
                     console.log('this is res', result);
                     jsonData = result; // done
                     showMap(result)
                 }
-                
+
                 function setDot(map, coord) {
                     console.log(coord);
                     myMap = map;
@@ -67,8 +66,8 @@
                             iconCaptionMaxWidth: '50'
                         }));
                 }
-                
-                
+
+
                 function setDotYe(map, coord) {
                     console.log(coord);
                     myMap = map;
@@ -80,19 +79,19 @@
                             iconCaptionMaxWidth: '50'
                         }));
                 }
-                
+
                 function show_point(point) {
                     document.getElementById('map').innerHTML = '';
-                
+
                     var myMap = new ymaps.Map("map", {
                         center: [(point.latitude), (point.longitude)],
                         zoom: 10
                     }, {
                         searchControlProvider: 'yandex#search'
                     });
-                
+
                     let routes = [];
-                
+
                     for (var i = 0; i < jsonData.length; i++) {
                         routes[i] = [(jsonData[i].latitude), (jsonData[i].longitude)];
                         if (jsonData[i].acceleration > 6) {
@@ -101,13 +100,13 @@
                             setDotYe(myMap, routes[i])
                         }
                     }
-                
+
                 }
-                
+
                 function showMap(jsonData) {
                     ymaps.ready(init);
-                
-                
+
+
                     function init() {
                         // Создаем карту.
                         var myMap = new ymaps.Map("map", {
@@ -116,9 +115,9 @@
                         }, {
                             searchControlProvider: 'yandex#search'
                         });
-                
+
                         let routes = [];
-                
+
                         for (var i = 0; i < jsonData.length; i++) {
                             routes[i] = [(jsonData[i].latitude), (jsonData[i].longitude)];
                             if (jsonData[i].acceleration > 6) {
@@ -127,14 +126,14 @@
                                 setDotYe(myMap, routes[i])
                             }
                         }
-                
+
                         console.log(routes);
                         setDotYe(myMap, [60.117892, 30.150051])
-                
+
                     }
-                
-                
-                
+
+
+
                     function init_table() {
                         for (let i = 0; i < jsonData.length; i++) {
                             document.querySelector('tbody').innerHTML += `
@@ -148,16 +147,16 @@
                         }
                     }
                     init_table();
-                
-                
+
+
                 }
-                
+
                 get_points(fetch_json());
             </script>
             <div id="map" style="min-height: 500px"></div>
             <h2>Подробные данные</h2>
             <div class="table-responsive">
-                <table class="table table-striped table-sm">
+                <table class="table table-striped table-sm" id="table">
                     <thead>
                         <tr>
                             <th>#</th>
@@ -174,6 +173,32 @@
             <form name="critical_parameters" method="get" action="/">
                 <input placeholder="Введите среднее критическое значение"><input placeholder="Введите наиболее высокое критическое значение">
             </form>
+            <script>
+                var tableToExcel = (function() {
+                    var uri = 'data:application/vnd.ms-excel;base64,'
+                    , template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--><meta http-equiv="content-type" content="text/plain; charset=UTF-8"/></head><body><table>{table}</table></body></html>'
+                    , base64 = function(s) { return window.btoa(unescape(encodeURIComponent(s))) }
+                    , format = function(s, c) {
+                        return s.replace(/{(\w+)}/g, function(m, p) { return c[p]; })
+                    }
+                    , downloadURI = function(uri, name) {
+                        var link = document.createElement("a");
+                        link.download = name;
+                        link.href = uri;
+                        link.click();
+                    };
+
+                    return function(table, name, fileName) {
+                        if (!table.nodeType) table = document.getElementById(table);
+                            var ctx = {worksheet: name || 'Worksheet', table: table.innerHTML};
+                        var resuri = uri + base64(format(template, ctx));
+                        downloadURI(resuri, fileName);
+                    }
+                })();
+                    let table_name = document.getElementById('report_name').innerText;
+                    document.getElementById('export').onclick = function () {tableToExcel('table', table_name, table_name + '.xls')};
+
+            </script>
         </main>
     </div>
 </body>
