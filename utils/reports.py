@@ -10,6 +10,7 @@ def add_new_data(json_data):
     json_data = json_data['data']
 
     for point in json_data:
+        # print(point['coordinate']['latitude'])
         parameter_add(point)
 
 
@@ -100,3 +101,19 @@ def get_date_from_request(request_params):
     date = '{}.{}.{}'.format(date[2], date[1], date[0])
 
     return date
+
+
+def get_critical_from_request(request_params):
+
+    critical = [
+        {
+            'type': 'medium',
+            'acceleration': request_params.medium
+         },
+        {
+            'type': 'high',
+            'acceleration': request_params.high
+        }
+    ]
+
+    return critical
