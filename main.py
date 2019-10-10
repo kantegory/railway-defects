@@ -1,6 +1,7 @@
 import bottle
-from bottle import auth_basic, request, route, template
-from utils.reports import create_report_by_date, add_new_data, get_date_from_request
+from bottle import request, route, template
+from utils.reports import create_report_by_date, add_new_data, get_date_from_request, get_critical_from_request
+from utils.db_manage import critical_parameter_update, critical_parameter_select
 import json
 
 app = bottle.app()
@@ -10,7 +11,10 @@ app = bottle.app()
 def show_main():
     date = get_date_from_request(request.params)
     rows = create_report_by_date(date)
-    return template('assets/index', date=date, rows=rows, json_data=rows, response_date=request.params.date)
+    medium_critical = critical_parameter_select({'type': 'medium'})['acceleration']
+    high_critical = critical_parameter_select({'type': 'high'})['acceleration']
+    return template('assets/index', date=date, rows=rows, json_data=rows, response_date=request.params.date,
+                    medium_critical=medium_critical, high_critical=high_critical)
 
 
 @route('/new_report', method='GET')
@@ -30,6 +34,12 @@ def get_points():
     date = get_date_from_request(request.params)
     rows = create_report_by_date(date)
     return rows
+
+
+@route('/set_critical', method='GET')
+def set_critical():
+    parameters = get_critical_from_request(request.params)
+    critical_parameter_update(parameters)
 
 
 def main():
