@@ -29,7 +29,7 @@
                         <button type="button" class="btn btn-sm btn-outline-secondary" id="export">Экспортировать</button>
                     </div>
                     <form action="/" method="get">
-                        <input type="date" name="date" class="btn btn-sm btn-outline-secondary">
+                        <input type="date" name="date" class="btn btn-sm btn-outline-secondary" value="{{ response_date }}">
                         <button type="submit" class="ml-1 btn bg-fpc text-white"><i class="fa fa-filter"></i></button>
                     </form>
                 </div>
@@ -170,10 +170,37 @@
                 </table>
             </div>
             <h2>Настройка</h2>
-            <form name="critical_parameters" method="get" action="/">
-                <input placeholder="Введите среднее критическое значение"><input placeholder="Введите наиболее высокое критическое значение">
+            <div id="pre-success">
+            </div>
+            <form class="form-group" method="get" action="/">
+                <div class="form-group m-1 w-25">
+                    <label for="medium_critical_parameter">Среднее критическое значение:</label>
+                    <input id="medium_critical_parameter" class="form-control" placeholder="Среднее крит. значение" value="{{ medium_critical }}">
+                </div>
+                <div class="form-group m-1 w-25">
+                    <label for="high_critical_parameter">Высокое критическое значение:</label>
+                    <input id="high_critical_parameter" class="form-control" placeholder="Высокое крит. значение" value="{{ high_critical }}">
+                </div>
+                <button type="button" onclick="set_critical()" class="m-1 btn btn-secondary">Сохранить</button>
             </form>
+
             <script>
+                function set_critical() {
+                    let medium = document.getElementById('medium_critical_parameter').value;
+                    let high = document.getElementById('high_critical_parameter').value;
+                    
+                    fetch('/set_critical?medium=' + medium + '&high=' + high);
+                    success()
+                }
+
+                function success() {
+                    document.getElementById('pre-success').innerHTML = `
+                        <div class="alert alert-success w-25" id="success">
+                          Изменения успешно внесены.
+                        </div>`;
+                    setTimeout("document.getElementById('success').remove()", 5000)
+                }
+                
                 var tableToExcel = (function() {
                     var uri = 'data:application/vnd.ms-excel;base64,'
                     , template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--><meta http-equiv="content-type" content="text/plain; charset=UTF-8"/></head><body><table>{table}</table></body></html>'
