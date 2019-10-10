@@ -34,24 +34,28 @@ def parameter_add(data):
 
 def critical_parameter_add(data):
     s = session()
-    rows = s.query(CriticalParameters).all()
-    check = []
-    for row in rows:
-        check.append(row.acceleration)
-    for curr_row in data:
-        if curr_row["acceleration"] not in check:
-            parameters = CriticalParameters(
-                acceleration=curr_row["acceleration"],
-                type=curr_row["type"]
-            )
-            s.add(parameters)
+    parameters = CriticalParameters(
+        acceleration=data["acceleration"],
+        type=data["type"]
+    )
+    s.add(parameters)
     s.commit()
 
 
 def critical_parameter_update(data):
+
     s = session()
-    s.query(CriticalParameters).filter(CriticalParameters.type == data["type"]).update({"acceleration": data["acceleration"]})
-    s.commit()
+
+    for parameter in data:
+        print(parameter)
+        check = len(critical_parameter_select(parameter))
+        print(check)
+        if check == 0:
+            print('checked')
+            critical_parameter_add(parameter)
+        else:
+            s.query(CriticalParameters).filter(CriticalParameters.type == parameter["type"]).update({"acceleration": parameter["acceleration"]})
+            s.commit()
 
 
 def user_auth(data):
@@ -79,10 +83,7 @@ def parameter_select_by_date(data):
 def critical_parameter_select(data):
     s = session()
     rows = s.query(CriticalParameters).filter(CriticalParameters.type == data["type"]).all()
-    result = [
-        {
-            "acceleration": rows[i].acceleration
-        }
-        for i in range(len(rows))
-    ]
+    result = {
+        "acceleration": rows[0].acceleration
+    }
     return result
