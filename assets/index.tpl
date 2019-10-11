@@ -120,7 +120,7 @@
 
                         for (var i = 0; i < jsonData.length; i++) {
                             routes[i] = [(jsonData[i].latitude), (jsonData[i].longitude)];
-                            if (jsonData[i].acceleration > 6) {
+                            if (jsonData[i].acceleration >  6) { // заменить 6 на high_critical
                                 setDot(myMap, routes[i])
                             } else {
                                 setDotYe(myMap, routes[i])
