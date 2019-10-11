@@ -11,9 +11,11 @@ app = bottle.app()
 def show_main():
     date = get_date_from_request(request.params)
     rows = create_report_by_date(date)
+    report_date = json.loads(rows)[0]['time']
     medium_critical = critical_parameter_select({'type': 'medium'})['acceleration']
     high_critical = critical_parameter_select({'type': 'high'})['acceleration']
-    return template('assets/index', date=date, rows=rows, json_data=rows, response_date=request.params.date,
+
+    return template('assets/index', date=report_date, rows=rows, json_data=rows, response_date=request.params.date,
                     medium_critical=medium_critical, high_critical=high_critical)
 
 
