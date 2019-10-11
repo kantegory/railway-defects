@@ -68,12 +68,16 @@ def user_auth(data):
 
 def unique(arr):
     arr = np.array(arr)
-    return np.unique(arr)
+    arr = np.unique(arr)
+    for i in range(len(arr)):
+        arr[i] = datetime.datetime.strptime(arr[i], '%d.%m.%Y')
+
+    return np.sort(arr)
 
 
 def get_last_date(arr):
     arr = unique(arr)
-    last_date = arr[-1]
+    last_date = datetime.datetime.strptime(arr[-1], '%Y-%m-%d').strftime('%d.%m.%Y')
 
     return last_date
 
