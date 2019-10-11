@@ -1,6 +1,7 @@
 from .db import Parameters, Users, CriticalParameters, session
 import datetime
 import json
+import numpy as np
 
 
 def user_add(data):
@@ -65,9 +66,31 @@ def user_auth(data):
     return auth
 
 
+def unique(arr):
+    arr = np.array(arr)
+    return np.unique(arr)
+
+
+def get_last_date(arr):
+    arr = unique(arr)
+    last_date = arr[-1]
+
+    return last_date
+
+
 def parameter_select_by_date(data):
     s = session()
+
     rows = s.query(Parameters).filter(Parameters.time == data["time"]).all()
+
+    if len(rows) == 0:
+
+        dates_arr = s.query(Parameters).filter(Parameters.time).all()
+        dates_arr = [dates_arr[i].time for i in range(len(dates_arr))]
+        last_date = get_last_date(dates_arr)
+
+        rows = s.query(Parameters).filter(Parameters.time == last_date).all()
+
     result = [
         {
             "longitude": rows[i].longitude,
