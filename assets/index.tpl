@@ -34,7 +34,44 @@
                     </form>
                 </div>
             </div>
-            <script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU&amp;apikey=b82b407e-9d44-4439-bd5d-ecd991b142bb" type="text/javascript"></script>
+            <div id="map" style="min-height: 500px"></div>
+            <h2>Подробные данные</h2>
+            <div class="table-responsive">
+                <table class="table table-striped table-sm" id="table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Широта</th>
+                            <th>Долгота</th>
+                            <th>Значение датчика</th>
+                        </tr>
+                    </thead>
+                    <tbody style="cursor: pointer;">
+                    </tbody>
+                </table>
+            </div>
+            <h2>Настройка</h2>
+            <div id="pre-success">
+            </div>
+            <form class="form-group" method="get" action="/">
+                <div class="form-group m-1 w-25">
+                    <label for="medium_critical_parameter">Среднее критическое значение:</label>
+                    <input id="medium_critical_parameter" class="form-control" placeholder="Среднее крит. значение" value="{{ medium_critical }}">
+                </div>
+                <div class="form-group m-1 w-25">
+                    <label for="high_critical_parameter">Высокое критическое значение:</label>
+                    <input id="high_critical_parameter" class="form-control" placeholder="Высокое крит. значение" value="{{ high_critical }}">
+                </div>
+                <button type="button" onclick="set_critical()" class="m-1 btn btn-secondary">Сохранить</button>
+            </form>
+            <!-- Load Scripts -->
+            <script>
+                let scr = {"scripts":[
+                    {"src" : "https://api-maps.yandex.ru/2.1/?lang=ru_RU&amp;apikey=b82b407e-9d44-4439-bd5d-ecd991b142bb", "async" : false},
+                    {"src" : "js?script_name=export.js", "async" : false},
+                    {"src" : "js?script_name=push.js", "async" : false}
+                ]};!function(t,n,r){"use strict";var c=function(t){if("[object Array]"!==Object.prototype.toString.call(t))return!1;for(var r=0;r<t.length;r++){var c=n.createElement("script"),e=t[r];c.src=e.src,c.async=e.async,n.body.appendChild(c)}return!0};t.addEventListener?t.addEventListener("load",function(){c(r.scripts);},!1):t.attachEvent?t.attachEvent("onload",function(){c(r.scripts)}):t.onload=function(){c(r.scripts)}}(window,document,scr);
+            </script>
             <script type="text/javascript">
                 function fetch_json() {
                     return fetch('/get_points?date={{ response_date }}')
@@ -50,13 +87,11 @@
                 }
 
                 function get_json_data(result) {
-                    console.log('this is res', result);
                     jsonData = result; // done
                     showMap(result)
                 }
 
                 function setDot(map, coord) {
-                    console.log(coord);
                     myMap = map;
                     myMap.geoObjects
                         .add(new ymaps.Placemark(coord, {
@@ -69,7 +104,6 @@
 
 
                 function setDotYe(map, coord) {
-                    console.log(coord);
                     myMap = map;
                     myMap.geoObjects
                         .add(new ymaps.Placemark(coord, {
@@ -108,28 +142,8 @@
 
 
                     function init() {
-                        // Создаем карту.
-                        var myMap = new ymaps.Map("map", {
-                            center: [(jsonData[0].latitude), (jsonData[0].longitude)],
-                            zoom: 10
-                        }, {
-                            searchControlProvider: 'yandex#search'
-                        });
-
-                        let routes = [];
-
-                        for (var i = 0; i < jsonData.length; i++) {
-                            routes[i] = [(jsonData[i].latitude), (jsonData[i].longitude)];
-                            if (jsonData[i].acceleration >  6) { // заменить 6 на high_critical
-                                setDot(myMap, routes[i])
-                            } else {
-                                setDotYe(myMap, routes[i])
-                            }
-                        }
-
-                        console.log(routes);
-                        setDotYe(myMap, [60.117892, 30.150051])
-
+                        let point = jsonData[0];
+                        show_point(point);
                     }
 
 
@@ -137,97 +151,23 @@
                     function init_table() {
                         for (let i = 0; i < jsonData.length; i++) {
                             document.querySelector('tbody').innerHTML += `
-                                            <tr onclick='show_point(` + JSON.stringify(jsonData[i]) + `)'>
-                                                <td>` + i + `</td>
-                                                <td>` + jsonData[i].latitude + `</td>
-                                                <td>` + jsonData[i].longitude + `</td>
-                                                <td>` + jsonData[i].acceleration + `</td>
-                                            </tr>
-                                        `
+                                                        <tr onclick='show_point(` + JSON.stringify(jsonData[i]) + `)'>
+                                                            <td>` + i + `</td>
+                                                            <td>` + jsonData[i].latitude + `</td>
+                                                            <td>` + jsonData[i].longitude + `</td>
+                                                            <td>` + jsonData[i].acceleration + `</td>
+                                                        </tr>
+                                                    `
                         }
                     }
+
                     init_table();
-
-
                 }
 
-                get_points(fetch_json());
-            </script>
-            <div id="map" style="min-height: 500px"></div>
-            <h2>Подробные данные</h2>
-            <div class="table-responsive">
-                <table class="table table-striped table-sm" id="table">
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Широта</th>
-                            <th>Долгота</th>
-                            <th>Значение датчика</th>
-                        </tr>
-                    </thead>
-                    <tbody style="cursor: pointer;">
-                    </tbody>
-                </table>
-            </div>
-            <h2>Настройка</h2>
-            <div id="pre-success">
-            </div>
-            <form class="form-group" method="get" action="/">
-                <div class="form-group m-1 w-25">
-                    <label for="medium_critical_parameter">Среднее критическое значение:</label>
-                    <input id="medium_critical_parameter" class="form-control" placeholder="Среднее крит. значение" value="{{ medium_critical }}">
-                </div>
-                <div class="form-group m-1 w-25">
-                    <label for="high_critical_parameter">Высокое критическое значение:</label>
-                    <input id="high_critical_parameter" class="form-control" placeholder="Высокое крит. значение" value="{{ high_critical }}">
-                </div>
-                <button type="button" onclick="set_critical()" class="m-1 btn btn-secondary">Сохранить</button>
-            </form>
-
-            <script>
-                function set_critical() {
-                    let medium = document.getElementById('medium_critical_parameter').value;
-                    let high = document.getElementById('high_critical_parameter').value;
-                    
-                    fetch('/set_critical?medium=' + medium + '&high=' + high);
-                    success()
-                }
-
-                function success() {
-                    document.getElementById('pre-success').innerHTML = `
-                        <div class="alert alert-success w-25" id="success">
-                          Изменения успешно внесены.
-                        </div>`;
-                    setTimeout("document.getElementById('success').remove()", 5000)
-                }
-                
-                var tableToExcel = (function() {
-                    var uri = 'data:application/vnd.ms-excel;base64,'
-                    , template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--><meta http-equiv="content-type" content="text/plain; charset=UTF-8"/></head><body><table>{table}</table></body></html>'
-                    , base64 = function(s) { return window.btoa(unescape(encodeURIComponent(s))) }
-                    , format = function(s, c) {
-                        return s.replace(/{(\w+)}/g, function(m, p) { return c[p]; })
-                    }
-                    , downloadURI = function(uri, name) {
-                        var link = document.createElement("a");
-                        link.download = name;
-                        link.href = uri;
-                        link.click();
-                    };
-
-                    return function(table, name, fileName) {
-                        if (!table.nodeType) table = document.getElementById(table);
-                            var ctx = {worksheet: name || 'Worksheet', table: table.innerHTML};
-                        var resuri = uri + base64(format(template, ctx));
-                        downloadURI(resuri, fileName);
-                    }
-                })();
-                    let table_name = document.getElementById('report_name').innerText;
-                    document.getElementById('export').onclick = function () {tableToExcel('table', table_name, table_name + '.xls')};
+                get_points(fetch_json())
 
             </script>
         </main>
     </div>
 </body>
-
 </html>
