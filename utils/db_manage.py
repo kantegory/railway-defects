@@ -76,7 +76,7 @@ def unique(arr):
 
 def get_last_date(arr):
     arr = unique(arr)
-    last_date = datetime.datetime.strptime(arr[-1], '%Y-%m-%d').strftime('%d.%m.%Y')
+    last_date = arr[-1].strftime('%d.%m.%Y')
 
     return last_date
 
