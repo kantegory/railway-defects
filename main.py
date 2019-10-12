@@ -1,5 +1,5 @@
 import bottle
-from bottle import request, route, template
+from bottle import request, route, template, static_file
 from utils.reports import create_report_by_date, add_new_data, get_date_from_request, get_critical_from_request
 from utils.db_manage import critical_parameter_update, critical_parameter_select
 import json
@@ -42,6 +42,17 @@ def get_points():
 def set_critical():
     parameters = get_critical_from_request(request.params)
     critical_parameter_update(parameters)
+
+
+@route('/js', method='GET')
+def get_js():
+    script_name = request.params.script_name
+    script = {
+        'path': 'js/',
+        'name': '{}'.format(script_name)
+    }
+    js = '{}{}'.format(script['path'], script['name'])
+    return static_file(js, root='assets')
 
 
 def main():
