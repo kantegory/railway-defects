@@ -1,8 +1,6 @@
 import smtplib
 from .db_manage import critical_parameter_select, parameter_select_by_date, parameter_add
-import json
 import datetime
-import matplotlib.pyplot as plt
 
 
 def add_new_data(json_data):
@@ -10,14 +8,13 @@ def add_new_data(json_data):
     json_data = json_data['data']
 
     for point in json_data:
-        # print(point['coordinate']['latitude'])
         parameter_add(point)
 
 
 def create_report_by_date(date):
     data = {'time': date}
     report_parameters = parameter_select_by_date(data)
-    print('this', report_parameters)
+
     return report_parameters
 
 
@@ -65,6 +62,8 @@ def send_email_func(msg):
     connection.sendmail(email_sender, email_receiver, msg)
 
     connection.quit()
+
+
 msg = 'Hi! this email is from python...'
 send_email_func(msg)
 
@@ -81,14 +80,12 @@ def clusterize():
         count = 0
         clusters.append([parameters[i][0], parameters[i][1], 0])
         for j in range(i + 1, len(parameters)):
-            if (parameters[i][0] + area < parameters[j][0]):
+            if parameters[i][0] + area < parameters[j][0]:
                 break
-            if (parameters[i][1] + area < parameters[j][1]):
+            if parameters[i][1] + area < parameters[j][1]:
                 continue
             count += 1
         clusters[i][2] = count
-
-    print(clusters)
 
 
 clusterize()

@@ -12,8 +12,10 @@ def show_main():
     date = get_date_from_request(request.params)
     rows = create_report_by_date(date)
     report_date = json.loads(rows)[0]['time']
-    medium_critical = critical_parameter_select({'type': 'medium'})['acceleration']
-    high_critical = critical_parameter_select({'type': 'high'})['acceleration']
+    medium_critical = critical_parameter_select({'type': 'medium'})
+    high_critical = critical_parameter_select({'type': 'high'})
+    medium_critical = medium_critical['acceleration'] if len(medium_critical) != 0 else 0
+    high_critical = high_critical['acceleration'] if len(high_critical) != 0 else 0
 
     return template('assets/index', date=report_date, rows=rows, json_data=rows, response_date=request.params.date,
                     medium_critical=medium_critical, high_critical=high_critical)

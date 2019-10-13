@@ -111,5 +111,5 @@ def critical_parameter_select(data):
     rows = s.query(CriticalParameters).filter(CriticalParameters.type == data["type"]).all()
     result = {
         "acceleration": rows[0].acceleration
-    }
+    } if len(rows) != 0 else {}
     return result
