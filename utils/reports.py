@@ -64,31 +64,18 @@ def send_email_func(msg):
     connection.quit()
 
 
-msg = 'Hi! this email is from python...'
-send_email_func(msg)
+# msg = 'Hi! this email is from python...'
+# send_email_func(msg)
+#
+# # HardCode
+# area = 0.01
+# example = [[1.0, 1.2, 10], [1.0001, 1.2001, 10], [100, 120, 10]]
 
-# HardCode
-area = 0.01
-example = [[1.0, 1.2, 10], [1.0001, 1.2001, 10], [100, 120, 10]]
+def get_cluster(longitude, latitude):
+    longitude_clusters_count = 180
+    latitude_clusters_count = 90
 
-
-def clusterize():
-    clusters = list()
-    parameters = example
-    parameters = sorted(parameters, key = lambda x: x[0])
-    for i in range(len(parameters)):
-        count = 0
-        clusters.append([parameters[i][0], parameters[i][1], 0])
-        for j in range(i + 1, len(parameters)):
-            if parameters[i][0] + area < parameters[j][0]:
-                break
-            if parameters[i][1] + area < parameters[j][1]:
-                continue
-            count += 1
-        clusters[i][2] = count
-
-
-clusterize()
+    return longitude % longitude_clusters_count, latitude % latitude_clusters_count
 
 
 def get_date_from_request(request_params):
