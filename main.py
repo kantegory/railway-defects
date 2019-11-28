@@ -57,14 +57,10 @@ def get_js():
     return static_file(js, root='assets')
 
 
-def main():
-    bottle.run(app=app, port=8081)
+def main(_host="localhost"):
+    bottle.run(app=app, host=_host, port=8081)
 
 
 if __name__ == '__main__':
-    if os.environ.get('APP_LOCATION') == 'heroku':
-        run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
-    else:
-        run(host='localhost', port=8080, debug=True)
-
-#     main()
+    host = "0.0.0.0"
+    main(host)
